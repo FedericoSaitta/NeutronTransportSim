@@ -2,6 +2,11 @@
 
 #include <iostream>
 
+enum EnableOptimizations {
+    NO_OPT=0,
+    OPT=1,
+};
+
 class ThreeVec {
 public:
     double x;
@@ -9,7 +14,7 @@ public:
     double z;
 
     ThreeVec() : x(0.0), y(0.0), z(0.0) {}
-    ThreeVec(double a, double b, double c) : x(a), y(b), z(c) {}
+    ThreeVec(const double a, const double b, const double c) : x(a), y(b), z(c) {}
 
     // Overloading + operator
     ThreeVec operator+ (const ThreeVec& other) const

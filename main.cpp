@@ -10,7 +10,9 @@ static std::random_device rd;
 static std::mt19937 gen(rd()); // Mersenne Twister generator
 static std::uniform_real_distribution<double> dist(0.0, 1.0);
 
-
+// Enabling optimizations enables:
+// - linear instead of trig random vector (so not isotropic)
+// faster log expression
 int main() {
     const Material water{3.47, 0.642 / 100.0};
     const Material lead{0.38, 1.389 / 100.0};
@@ -21,28 +23,31 @@ int main() {
     constexpr double slabSize{ 10.0 };
 
     Timer t{};
-    ThreeVec results = fastSimulation(numNeutrons, water, slabSize);
+    ThreeVec results = fastSimulation<OPT>(numNeutrons, water, slabSize);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z << '\n';
+              << ", Transmitted: " << results.z
+              << ", Walks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     t.reset();
-    results = fastSimulation(numNeutrons, lead, slabSize);
+    results = fastSimulation<OPT>(numNeutrons, lead, slabSize);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z << '\n';
+              << ", Transmitted: " << results.z
+              << ", Walks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     t.reset();
-    results = fastSimulation(numNeutrons, graphite, slabSize);
+    results = fastSimulation<OPT>(numNeutrons, graphite, slabSize);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z << '\n';
+              << ", Transmitted: " << results.z
+              << ", Walks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     return 0;
 }

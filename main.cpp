@@ -6,10 +6,6 @@
 #include "utils/material.h"
 #include "simulations/simulations.h"
 
-static std::random_device rd;
-static std::mt19937 gen(rd()); // Mersenne Twister generator
-static std::uniform_real_distribution<double> dist(0.0, 1.0);
-
 // Enabling optimizations enables:
 // - linear instead of trig random vector (so not isotropic)
 // faster log expression
@@ -19,7 +15,7 @@ int main() {
     const Material graphite{0.40, 0.095 / 100.0};
     const Material vacuum{};
 
-    constexpr int numNeutrons{ 500'000 };
+    constexpr int numNeutrons{ 500 };
     constexpr double slabSize{ 10.0 };
 
     Timer t{};
@@ -45,13 +41,30 @@ int main() {
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     t.reset();
-    results = volumeSimulation(numNeutrons, water, slab);
+    results = volumeSimulation(numNeutrons, graphite, slab);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
               << ", Transmitted: " << results.z
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
+
+
+    std::cout << "Testing out Woodcock method\n";
+
+    const Slab slab1(0.0, 5.0);
+    const Slab slab2(5.0, 10.0);
+
+    t.reset();
+    results = volumeWoodCockSimulation(numNeutrons, graphite, graphite, slab1, slab2);
+    t.display();
+
+    std::cout << "Reflected: " << results.x
+              << ", Absorbed: " << results.y
+              << ", Transmitted: " << results.z
+              << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
+
+
 
     return 0;
 }

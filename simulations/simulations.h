@@ -10,6 +10,7 @@
 
 
 ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol);
+ThreeVec volumeWoodCockSimulation(const unsigned long numNeutrons, const Material& mat1, const Material& mat2, const Volume& vol1, const Volume& vol2);
 
 template<EnableOptimizations opt>
 ThreeVec fastSimulation(const unsigned long numNeutrons, const Material& mat, const double slabSize) {

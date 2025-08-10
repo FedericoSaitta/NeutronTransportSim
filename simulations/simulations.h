@@ -6,6 +6,10 @@
 #include "../utils/material.h"
 #include "../utils/types.h"
 #include "../utils/mathOps.h"
+#include "../sceneSetUp/volume.h"
+
+
+ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol);
 
 template<EnableOptimizations opt>
 ThreeVec fastSimulation(const unsigned long numNeutrons, const Material& mat, const double slabSize) {

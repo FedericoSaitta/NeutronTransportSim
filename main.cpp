@@ -19,35 +19,39 @@ int main() {
     const Material graphite{0.40, 0.095 / 100.0};
     const Material vacuum{};
 
-    constexpr int numNeutrons{ 100'000 };
+    constexpr int numNeutrons{ 500'000 };
     constexpr double slabSize{ 10.0 };
 
     Timer t{};
-    ThreeVec results = fastSimulation<OPT>(numNeutrons, water, slabSize);
+    ThreeVec results = fastSimulation<NO_OPT>(numNeutrons, water, slabSize);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
               << ", Transmitted: " << results.z
-              << ", Walks/s: " << numNeutrons / t.elapsed() <<'\n';
+              << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
+
+    std::cout << "Volume Simulation\n";
+
+    const Slab slab(0.0, 10.0);
 
     t.reset();
-    results = fastSimulation<OPT>(numNeutrons, lead, slabSize);
+    results = volumeSimulation(numNeutrons, water, slab);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
               << ", Transmitted: " << results.z
-              << ", Walks/s: " << numNeutrons / t.elapsed() <<'\n';
+              << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     t.reset();
-    results = fastSimulation<OPT>(numNeutrons, graphite, slabSize);
+    results = volumeSimulation(numNeutrons, water, slab);
     t.display();
 
     std::cout << "Reflected: " << results.x
               << ", Absorbed: " << results.y
               << ", Transmitted: " << results.z
-              << ", Walks/s: " << numNeutrons / t.elapsed() <<'\n';
+              << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     return 0;
 }

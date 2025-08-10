@@ -17,20 +17,20 @@ public:
     ThreeVec(const double a, const double b, const double c) : x(a), y(b), z(c) {}
 
     // Overloading + operator
-    ThreeVec operator+ (const ThreeVec& other) const
-    {
+    ThreeVec operator+ (const ThreeVec& other) const {
         return { this->x + other.x, this->y + other.y, this->z + other.z};
     }
 
-    ThreeVec operator* (const ThreeVec& other) const
-    {
+    ThreeVec operator* (const ThreeVec& other) const {
         return { this->x * other.x, this->y * other.y, this->z * other.z};
     }
 
-    ThreeVec operator* (const double coeff) const
-    {
+    ThreeVec operator* (const double coeff) const {
         return { this->x * coeff, this->y * coeff, this->z * coeff};
     }
+
+    double mag() const { return std::sqrt(x*x + y*y  + z*z); }
+    double mag2() const { return x*x + y*y  + z*z; }
 
     void update(double a, double b, double c) {
         this->x = a;

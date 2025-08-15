@@ -4,17 +4,24 @@
 
 class Volume {
 public:
+    Volume() : centreX(0.0), centreY(0.0) {}
+    Volume(const double x, const double y) : centreX(x), centreY(y) {}
+
     virtual ~Volume() = default;
     virtual bool contains(const TwoVec& p) const = 0;
     virtual ShapeType shapeType() const = 0;
     virtual RenderInfo renderInfo() const = 0;
+
+protected:
+    double centreX;
+    double centreY;
 };
 
 // For now this is just a slab in the x direction
 // in the future a plane method will be made which will be more general
 class Slab final : public Volume{
 public:
-    explicit Slab(const double xMin, const double xMax) : xMin(xMin), xMax(xMax) {}
+    explicit Slab(const double xMin, const double xMax) : Volume((xMax+xMin) / 2.0, 0.0), xMin(xMin), xMax(xMax) {}
 
     bool contains(const TwoVec& p) const override {
         return (p.x <= xMax) && (p.x >= xMin);
@@ -24,7 +31,7 @@ public:
 
     // For now just huge number in the y direction, not inf though
     RenderInfo renderInfo() const override {
-        return {SLAB, xMax - xMin, 999999.9, (xMax + xMin) / 2, 0.0};
+        return {SLAB, xMax - xMin, 999999.9, centreX, centreY};
     }
 
 private:
@@ -32,15 +39,19 @@ private:
     double xMax;
 };
 
-class Sphere final : public Volume{
+class Circle final : public Volume{
 public:
-    explicit Sphere(const double radius) : radius(radius) {}
+    explicit Circle(const double radius, const double x, const double y) : Volume(x, y), radius(radius) {}
 
-    bool contains(const TwoVec &p) const override { return (p.mag() <= radius); }
+    bool contains(const TwoVec &p) const override {
+        const double dx = p.x - centreX;
+        const double dy = p.y - centreY;
+        return std::sqrt(dx * dx + dy * dy) <= radius;
+    }
     ShapeType shapeType() const override { return CIRCLE; }
 
     RenderInfo renderInfo() const override {
-        return {CIRCLE, radius, radius, 0.0, 0.0};
+        return {CIRCLE, radius, radius, centreX, centreY};
     }
 
 private:
@@ -50,7 +61,7 @@ private:
 class Rectanle final : public Volume{
 public:
     Rectanle(const TwoVec& minCorner, const TwoVec& maxCorner)
-    : minCorner(minCorner), maxCorner(maxCorner)  {}
+    : Volume((maxCorner.x + minCorner.x) / 2.0, (maxCorner.y + minCorner.y) / 2.0), minCorner(minCorner), maxCorner(maxCorner)  {}
 
     bool contains(const TwoVec& neutron) const override {
         return (neutron.x >= minCorner.x && neutron.x <= maxCorner.x) &&
@@ -59,8 +70,7 @@ public:
 
     ShapeType shapeType() const override { return ShapeType::RECTANGLE; }
     RenderInfo renderInfo() const override {
-        return {RECTANGLE, maxCorner.x - minCorner.x , maxCorner.y - minCorner.y,
-                (maxCorner.x + minCorner.x) / 2, (maxCorner.y + minCorner.y) / 2};
+        return {RECTANGLE, maxCorner.x - minCorner.x , maxCorner.y - minCorner.y, centreX, centreY};
     }
 
 private:

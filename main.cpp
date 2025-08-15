@@ -6,6 +6,8 @@
 #include "utils/material.h"
 #include "simulations/simulations.h"
 
+#include "GUI/gui.h"
+
 // Enabling optimizations enables:
 // - linear instead of trig random vector (so not isotropic)
 // faster log expression
@@ -63,6 +65,13 @@ int main() {
               << ", Absorbed: " << results.absorbed
               << ", Transmitted: " << results.transmitted
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
+
+
+    std::cout << "Now setting up GUI\n";
+    GUI gui{ 400, 400 };
+    const std::vector<const Volume*> scene{ &slab1 };
+
+    gui.setUp(scene);
 
     return 0;
 }

@@ -7,6 +7,19 @@ enum EnableOptimizations {
     OPT=1,
 };
 
+enum ShapeType {
+    CIRCLE=0,
+    RECTANGLE=1,
+    SLAB=2,
+};
+
+struct RenderInfo {
+    ShapeType type;
+    double width;  // x direction (radius if circle)
+    double height; // y direction (radius if circle)
+    double x, y;
+};
+
 struct SimReuslts {
     size_t absorbed;
     size_t reflected;

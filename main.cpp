@@ -15,16 +15,16 @@ int main() {
     const Material graphite{0.40, 0.095 / 100.0};
     const Material vacuum{};
 
-    constexpr int numNeutrons{ 500 };
+    constexpr int numNeutrons{ 100'000 };
     constexpr double slabSize{ 10.0 };
 
     Timer t{};
-    ThreeVec results = fastSimulation<NO_OPT>(numNeutrons, water, slabSize);
+    SimReuslts results = fastSimulation<NO_OPT>(numNeutrons, water, slabSize);
     t.display();
 
-    std::cout << "Reflected: " << results.x
-              << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z
+    std::cout << "Reflected: " << results.reflected
+              << ", Absorbed: " << results.absorbed
+              << ", Transmitted: " << results.transmitted
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     std::cout << "Volume Simulation\n";
@@ -35,18 +35,18 @@ int main() {
     results = volumeSimulation(numNeutrons, water, slab);
     t.display();
 
-    std::cout << "Reflected: " << results.x
-              << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z
+    std::cout << "Reflected: " << results.reflected
+              << ", Absorbed: " << results.absorbed
+              << ", Transmitted: " << results.transmitted
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
 
     t.reset();
     results = volumeSimulation(numNeutrons, graphite, slab);
     t.display();
 
-    std::cout << "Reflected: " << results.x
-              << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z
+    std::cout << "Reflected: " << results.reflected
+              << ", Absorbed: " << results.absorbed
+              << ", Transmitted: " << results.transmitted
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
 
 
@@ -59,12 +59,10 @@ int main() {
     results = volumeWoodCockSimulation(numNeutrons, graphite, graphite, slab1, slab2);
     t.display();
 
-    std::cout << "Reflected: " << results.x
-              << ", Absorbed: " << results.y
-              << ", Transmitted: " << results.z
+    std::cout << "Reflected: " << results.reflected
+              << ", Absorbed: " << results.absorbed
+              << ", Transmitted: " << results.transmitted
               << ", kWalks/s: " << numNeutrons / t.elapsed() <<'\n';
-
-
 
     return 0;
 }

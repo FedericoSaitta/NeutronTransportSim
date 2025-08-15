@@ -7,45 +7,49 @@ enum EnableOptimizations {
     OPT=1,
 };
 
-class ThreeVec {
+struct SimReuslts {
+    size_t absorbed;
+    size_t reflected;
+    size_t transmitted;
+};
+
+
+class TwoVec {
 public:
     double x;
     double y;
-    double z;
 
-    ThreeVec() : x(0.0), y(0.0), z(0.0) {}
-    ThreeVec(const double a, const double b, const double c) : x(a), y(b), z(c) {}
+    TwoVec() : x(0.0), y(0.0) {}
+    TwoVec(const double a, const double b) : x(a), y(b) {}
 
     // Overloading + operator
-    ThreeVec operator+ (const ThreeVec& other) const {
-        return { this->x + other.x, this->y + other.y, this->z + other.z};
+    TwoVec operator+ (const TwoVec& other) const {
+        return { this->x + other.x, this->y + other.y};
     }
 
-    ThreeVec operator* (const ThreeVec& other) const {
-        return { this->x * other.x, this->y * other.y, this->z * other.z};
+    TwoVec operator* (const TwoVec& other) const {
+        return { this->x * other.x, this->y * other.y};
     }
 
-    ThreeVec operator* (const double coeff) const {
-        return { this->x * coeff, this->y * coeff, this->z * coeff};
+    TwoVec operator* (const double coeff) const {
+        return { this->x * coeff, this->y * coeff};
     }
 
-    double mag() const { return std::sqrt(x*x + y*y  + z*z); }
-    double mag2() const { return x*x + y*y  + z*z; }
+    double mag() const { return std::sqrt(x*x + y*y); }
+    double mag2() const { return x*x + y*y; }
 
-    void update(double a, double b, double c) {
+    void update(const double a, const double b) {
         this->x = a;
         this->y = b;
-        this->z = c;
     }
 
-    void update(ThreeVec threevec) {
+    void update(const TwoVec& threevec) {
         this->x = threevec.x;
         this->y = threevec.y;
-        this->z = threevec.z;
     }
 
     void print() const {
-        std::cout << "ThreeVec: " << x << " ," << y << " ," << z << '\n';
+        std::cout << "TwoVec: " << x << " ," << y << '\n';
     }
 
 

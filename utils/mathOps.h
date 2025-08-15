@@ -11,27 +11,15 @@ inline double fastLog(double x) {
     return (u.l - 4606931270219946880LL) * 1.539095918623324e-16;
 }
 
-inline ThreeVec generate_isotropic_3vec(std::minstd_rand& gen, std::uniform_real_distribution<double>& dist) {
-    const double u1 { dist(gen) };
-    const double u2 { dist(gen) };
-
-    const double phi { 2 * M_PI * u1 };
-    const double theta { std::acos( 1 - 2 * u2 ) };
-
-    const double x { std::sin(theta) * std::cos(phi) };
-    const double y { std::sin(theta) * std::sin(phi) };
-    const double z { std::cos(theta) };
-
-    return {x, y, z};
+inline TwoVec generate_isotropic_2vec(std::minstd_rand& gen, std::uniform_real_distribution<double>& dist) {
+    const double angle = 2.0 * M_PI * dist(gen);
+    const double x = std::cos(angle);
+    const double y = std::sin(angle);
+    return {x, y};
 }
 
 inline double generate_isotropic_xcoord(std::minstd_rand& gen, std::uniform_real_distribution<double>& dist) {
-    const double u1 { dist(gen) };
-    const double u2 { dist(gen) };
-
-    const double phi { 2 * M_PI * u1 };
-    const double theta { std::acos( 1 - 2 * u2 ) };
-
-    const double x { std::sin(theta) * std::cos(phi) };
+    const double angle = 2.0 * M_PI * dist(gen);
+    const double x = std::cos(angle);
     return x;
 }

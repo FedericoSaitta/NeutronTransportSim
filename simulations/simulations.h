@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <random>
+#include <tuple>
 
 #include "../utils/material.h"
 #include "../utils/types.h"
@@ -9,11 +10,11 @@
 #include "../sceneSetUp/volume.h"
 
 
-ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol);
-ThreeVec volumeWoodCockSimulation(const unsigned long numNeutrons, const Material& mat1, const Material& mat2, const Volume& vol1, const Volume& vol2);
+SimReuslts volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol);
+SimReuslts volumeWoodCockSimulation(const unsigned long numNeutrons, const Material& mat1, const Material& mat2, const Volume& vol1, const Volume& vol2);
 
 template<EnableOptimizations opt>
-ThreeVec fastSimulation(const unsigned long numNeutrons, const Material& mat, const double slabSize) {
+SimReuslts fastSimulation(const unsigned long numNeutrons, const Material& mat, const double slabSize) {
     size_t absorbed = 0;
     size_t transmitted = 0;
     size_t reflected = 0;
@@ -69,7 +70,5 @@ ThreeVec fastSimulation(const unsigned long numNeutrons, const Material& mat, co
         activeCount = newActiveCount;
     }
 
-    return {static_cast<double>(reflected),
-            static_cast<double>(absorbed),
-            static_cast<double>(transmitted)};
+    return {absorbed, reflected, transmitted};
 }

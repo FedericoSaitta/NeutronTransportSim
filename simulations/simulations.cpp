@@ -2,6 +2,8 @@
 
 #include <vector>
 #include <random>
+#include <tuple>
+
 #include "../utils/material.h"
 #include "../utils/mathOps.h"
 #include "../utils/types.h"
@@ -9,7 +11,8 @@
 #include "../utils/logger.h"
 
 
-ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol) {
+
+SimReuslts volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol) {
     size_t absorbed = 0;
     size_t transmitted = 0;
     size_t reflected = 0;
@@ -23,8 +26,8 @@ ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, 
     std::uniform_real_distribution dist(0.0, 1.0);
 
     for (size_t i{}; i < numNeutrons; i++){
-        ThreeVec neutronPosition{0.0, 0.0, 0.0};
-        ThreeVec neutronDirection{1.0, 0.0, 0.0};
+        TwoVec neutronPosition{0.0, 0.0};
+        TwoVec neutronDirection{1.0, 0.0};
 
         bool isFirstStep{ true };
 
@@ -33,7 +36,7 @@ ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, 
             randomAbsorp = dist(gen);
 
             if (isFirstStep) isFirstStep = false;
-            else neutronDirection = generate_isotropic_3vec(gen, dist);
+            else neutronDirection = generate_isotropic_2vec(gen, dist);
 
             neutronPosition = neutronPosition +  neutronDirection * -std::log(randomStep) * mat.getMeanFreePath();
 
@@ -50,14 +53,12 @@ ThreeVec volumeSimulation(const unsigned long numNeutrons, const Material& mat, 
 
     }
 
-    return {static_cast<double>(reflected),
-            static_cast<double>(absorbed),
-            static_cast<double>(transmitted)};
+    return {absorbed, reflected, transmitted};
 }
 
 
 
-ThreeVec volumeWoodCockSimulation(const unsigned long numNeutrons, const Material& mat1, const Material& mat2, const Volume& vol1, const Volume& vol2) {
+SimReuslts volumeWoodCockSimulation(const unsigned long numNeutrons, const Material& mat1, const Material& mat2, const Volume& vol1, const Volume& vol2) {
     size_t absorbed = 0;
     size_t reflected = 0;
 
@@ -73,8 +74,8 @@ ThreeVec volumeWoodCockSimulation(const unsigned long numNeutrons, const Materia
     std::uniform_real_distribution dist(0.0, 1.0);
 
     for (size_t i{}; i < numNeutrons; i++) {
-        ThreeVec neutronPosition{0.0, 0.0, 0.0};
-        ThreeVec neutronDirection{1.0, 0.0, 0.0};
+        TwoVec neutronPosition{0.0, 0.0};
+        TwoVec neutronDirection{1.0, 0.0};
 
         // First step is never fictitious
         bool isStepFict{ false };
@@ -134,7 +135,7 @@ ThreeVec volumeWoodCockSimulation(const unsigned long numNeutrons, const Materia
             else {
                 // change direction as step is not fictitious
                 isStepFict = false;
-                neutronDirection = generate_isotropic_3vec(gen, dist);
+                neutronDirection = generate_isotropic_2vec(gen, dist);
             }
 
             const double stepLength{ -minMeanFreePath * std::log(dist(gen)) };
@@ -144,9 +145,7 @@ ThreeVec volumeWoodCockSimulation(const unsigned long numNeutrons, const Materia
         }
     }
 
-    return {static_cast<double>(reflected),
-            static_cast<double>(absorbed),
-            static_cast<double>(0.0)};
+    return {absorbed, reflected, 0};
 }
 
 

@@ -13,6 +13,14 @@ enum ShapeType {
     SLAB=2,
 };
 
+enum MaterialTypes {
+    WATER=0,
+    LEAD=1,
+    GRAPHITE=2,
+    VACUUM=3,
+};
+
+
 struct RenderInfo {
     ShapeType type;
     double width;  // x direction (radius if circle)

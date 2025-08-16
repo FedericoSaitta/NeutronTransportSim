@@ -150,4 +150,80 @@ SimReuslts volumeWoodCockSimulation(const unsigned long numNeutrons, const Mater
 
 
 
+// Need to debug this function, clearly the walk is not correct and it gets stuck
+// need to update this such that it does one correct step
+void stepVolumeWoodCockSimulation(std::vector<TwoVec>& neutronPositions, std::vector<bool>& isStepFict, std::vector<bool>& alive, const std::vector<Material>& materials, const std::vector<const Volume*> &volumes) {
+    const double majorantCrossSec{ std::max(materials[0].getCrossSec(),materials[1].getCrossSec()) };
+    const double minMeanFreePath{ 1.0 / majorantCrossSec };
+
+    // Random setup
+    std::random_device rd;
+    std::minstd_rand gen(rd()); // Faster than mt19937
+    std::uniform_real_distribution dist(0.0, 1.0);
+
+    const size_t numNeutrons{ neutronPositions.size() };
+
+    for (size_t i{}; i < numNeutrons; i++) {
+        DEBUG_LOG("Neutron num: " + std::to_string(i));
+        TwoVec neutronDirection{1.0, 0.0};
+
+        double currentMeanPath{};
+        double currentAbsProb{};
+
+        double neutronLeft{ true };
+        for (size_t j{}; j < volumes.size(); j++) {
+            if ( volumes[j]->contains(neutronPositions[i]) ) {
+                neutronLeft = false;
+                break;
+            }
+        }
+
+        DEBUG_LOG("\tHas left: " + std::to_string(neutronLeft));
+
+        // exit out of the loop if neutron left the system
+        if (neutronLeft) {
+            alive[i] = false;
+            continue;
+        }
+
+        // Get the correct material variables
+        for (size_t j{}; j < volumes.size(); j++) {
+            if ( volumes[j]->contains(neutronPositions[i]) ) {
+                currentMeanPath = materials[j].getMeanFreePath();
+                currentAbsProb = materials[j].getAbsorptionProb();
+                break;
+            }
+        }
+
+        DEBUG_LOG("\tCurrent Mean Path: " + std::to_string(currentMeanPath));
+        DEBUG_LOG("\tCurrent AbsProb: " + std::to_string(currentAbsProb));
+
+        // only non-fictitious steps can be absorbed
+        if (!isStepFict[i] &&  dist(gen) < currentAbsProb) {
+            DEBUG_LOG("\tNeutron Absorbed");
+            alive[i] = false;
+            continue;
+        }
+
+        const double probFictitious{ 1.0 / (majorantCrossSec * currentMeanPath) };
+
+        DEBUG_LOG("\tprobFictitious: " + std::to_string(probFictitious));
+        if (dist(gen) > probFictitious) {
+            isStepFict[i] = true;
+        }
+        else {
+            // change direction as step is not fictitious
+            isStepFict[i] = false;
+            neutronDirection = generate_isotropic_2vec(gen, dist);
+        }
+
+        const double stepLength{ -minMeanFreePath * std::log(dist(gen)) };
+        neutronPositions[i] = neutronPositions[i] +  neutronDirection * stepLength;
+
+        DEBUG_LOG("\tStep Length" + std::to_string(stepLength));
+    }
+}
+
+
+
 

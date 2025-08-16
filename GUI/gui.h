@@ -4,6 +4,7 @@
 #include <SFML/Graphics.hpp>
 
 #include "../sceneSetUp/volume.h"
+#include "../utils/material.h"
 
 
 class GUI {
@@ -12,7 +13,7 @@ public:
     GUI(const size_t xDim, const size_t yDim) : windowX(xDim), windowY(yDim) {}
 
 
-    void setUp(const std::vector<const Volume*>& scene) const;
+    void setUp(const std::vector<const Volume*>& scene, const std::vector<Material>& materials) const;
 
 
 

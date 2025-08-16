@@ -13,6 +13,7 @@
 SimReuslts volumeSimulation(const unsigned long numNeutrons, const Material& mat, const Volume& vol);
 SimReuslts volumeWoodCockSimulation(const unsigned long numNeutrons, const Material& mat1, const Material& mat2, const Volume& vol1, const Volume& vol2);
 
+void stepVolumeWoodCockSimulation(std::vector<TwoVec>& neutronPositions, std::vector<bool>& isStepFict, std::vector<bool>& alive,const std::vector<Material>& materials, const std::vector<const Volume*> &volumes);
 template<EnableOptimizations opt>
 SimReuslts fastSimulation(const unsigned long numNeutrons, const Material& mat, const double slabSize) {
     size_t absorbed = 0;

@@ -12,12 +12,12 @@
 // - linear instead of trig random vector (so not isotropic)
 // faster log expression
 int main() {
-    const Material water{3.47, 0.642 / 100.0};
-    const Material lead{0.38, 1.389 / 100.0};
-    const Material graphite{0.40, 0.095 / 100.0};
+    const Material water{3.47, 0.642 / 100.0, WATER};
+    const Material lead{0.38, 1.389 / 100.0, LEAD};
+    const Material graphite{0.40, 0.095 / 100.0, GRAPHITE};
     const Material vacuum{};
 
-    constexpr int numNeutrons{ 100'000 };
+    constexpr int numNeutrons{ 0 };
     constexpr double slabSize{ 10.0 };
 
     Timer t{};
@@ -71,11 +71,12 @@ int main() {
     const GUI gui{ 400, 400 };
 
 
-    const Slab slab3{0.0, 10.0};
-    const Circle circle{5.0, -10, 0};
-    const std::vector<const Volume*> scene{ &slab3, &circle };
+    const Slab slab3(0.0, 20.0);
+    const Slab slab4(-10.0, 0.0);
+    const std::vector<const Volume*> scene{ &slab3, &slab4 };
+    const std::vector<Material> materials{ water, graphite };
 
-    gui.setUp(scene);
+    gui.setUp(scene, materials);
 
     return 0;
 }

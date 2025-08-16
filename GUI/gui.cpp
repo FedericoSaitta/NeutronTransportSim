@@ -6,6 +6,8 @@
 
 #include "../utils/types.h"
 #include "../sceneSetUp/volume.h"
+#include "../utils/material.h"
+#include "../simulations/simulations.h"
 
 // Converts it such that (0,0) cartesian represents the middle of the screen
 // hence (0,0) -> (windowX/2, windowY/2), also each pixel is 1mm, the simulation components are in cm.
@@ -25,11 +27,24 @@ void convToCameraCoords(const size_t windowX, const size_t windowY, RenderInfo& 
     std::cout << "x: " << info.x <<'\n';
 }
 
-void GUI::setUp(const std::vector<const Volume*>& scene) const {
+sf::Color materialToColor(const Material& m) {
+    switch (m.getMaterialType()) {
+        case WATER:    return sf::Color::Blue;
+        case LEAD:    return sf::Color::Yellow;
+        case GRAPHITE: return sf::Color(192, 192, 192);  // light gray
+        default: return sf::Color::White;
+    }
+}
+
+void GUI::setUp(const std::vector<const Volume*>& scene, const std::vector<Material>& materials) const {
 
     sf::RenderWindow window(sf::VideoMode(windowX, windowY), "My 2D Scene");
+    window.setFramerateLimit(0);
     std::vector<std::unique_ptr<sf::Shape>> shapes;
+    sf::Clock clock;
+    const sf::Time frameDuration = sf::seconds(1.f / 30.f);
 
+    size_t counter{};
     for (const auto obj : scene) {
         auto info { obj->renderInfo() };
         convToCameraCoords(windowX, windowY, info);
@@ -41,18 +56,36 @@ void GUI::setUp(const std::vector<const Volume*>& scene) const {
             auto circle = std::make_unique<sf::CircleShape>(width);
             circle->setOrigin(width, width);
             circle->setPosition(x, y);
-            circle->setFillColor(sf::Color::Green);
+            circle->setFillColor( materialToColor(materials[counter]) );
             shapes.push_back(std::move(circle));
         } else if (type == ShapeType::SLAB) {
             auto rect = std::make_unique<sf::RectangleShape>(sf::Vector2f(width, height));
             rect->setOrigin(width / 2.f, height / 2.f);
             rect->setPosition(x, y);
-            rect->setFillColor(sf::Color::Blue);
+            rect->setFillColor( materialToColor(materials[counter]) );
             shapes.push_back(std::move(rect));
         }
+        counter++;
     }
 
+    std::vector<TwoVec> neutronPositions = {};
+    std::vector<bool> isStepFict = {};
+    std::vector<bool> alive = {};
+
+    for (int i{}; i < 500; i++) {
+        neutronPositions.push_back(TwoVec{0.0, 0.0});
+        isStepFict.push_back(false);
+        alive.push_back(true);
+    }
+
+    constexpr float neutronRadius = 3.0f; // pixels
+    sf::CircleShape neutronShape(neutronRadius);
+    neutronShape.setOrigin(neutronRadius, neutronRadius);
+    neutronShape.setFillColor(sf::Color::White);
+
     while (window.isOpen()) {
+        clock.restart();
+
         // Handle events
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -62,11 +95,35 @@ void GUI::setUp(const std::vector<const Volume*>& scene) const {
 
         window.clear(sf::Color::Black);
 
-        // Draw all shapes
+        // Draw all scene shapes
         for (const auto& shape : shapes)
             window.draw(*shape);
 
+        // Draw neutrons
+        for (std::size_t i = 0; i < neutronPositions.size(); ++i) {
+            if (alive[i]) {
+                neutronPositions[i].print();
+                auto& pos = neutronPositions[i];
+                const float cameraX = pos.x * 10 + 200;
+                const float cameraY = 200 - pos.y * 10;
+
+                neutronShape.setPosition( cameraX, cameraY );
+                window.draw(neutronShape);
+            }
+        }
+
         window.display();
+
+        // Advance simulation
+        stepVolumeWoodCockSimulation(neutronPositions, isStepFict, alive, materials, scene);
+
+        // --- Frame limiting ---
+        sf::Time elapsed = clock.getElapsedTime();
+
+        std::cout<< "FPS: " << 1.0 / elapsed.asSeconds() << '\n';
+        if (elapsed < frameDuration)
+            sf::sleep(frameDuration - elapsed);
+
     }
 
 }

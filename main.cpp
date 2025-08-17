@@ -68,16 +68,11 @@ int main() {
 
 
     std::cout << "Now setting up GUI\n";
-    const GUI gui{ 400, 400 };
+    GUI gui{ 400, 400 };
 
-
-    const Slab slab3(0.0, 5.0);
-    const Slab slab5(5.0, 10.0);
-    const Slab slab4(-10.0, 0.0);
-
-    const Circle circle (2.5, 2.5, 0.0);
-    const std::vector<const Volume*> scene{ &circle, &slab4, &slab5 };
-    const std::vector<Material> materials{ lead, graphite, water };
+    const Circle circle (30.0, 0.0, 0.0);
+    const std::vector<const Volume*> scene{ &circle };
+    const std::vector<Material> materials{ water };
 
     gui.setUp(scene, materials);
 

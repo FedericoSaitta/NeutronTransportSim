@@ -79,22 +79,27 @@ class Simulation {
 public:
     // Intializing simulation with all alive neutrons which their first step will not be fictitious
     Simulation(const size_t numNeutrons, const std::vector<Material>& materials,
-               const std::vector<const Volume*>& volumes) :
-            m_materials(materials), m_volumes(volumes), m_numNeutrons(numNeutrons), m_alive(numNeutrons, 1),
-            m_isStepFict(numNeutrons, 0), m_neutronPositions(numNeutrons, TwoVec{0.0, 0.0}), m_neutronDirections(numNeutrons, TwoVec{1.0, 0.0}) {
-            // neutrons facing x axis by default
+               const std::vector<const Volume*>& volumes) : m_materials(materials), m_volumes(volumes),
+                                                            m_numNeutrons(numNeutrons), m_numAbsorbed(0),
+                                                            m_alive(numNeutrons, 1),
+                                                            m_isStepFict(numNeutrons, 0),
+                                                            m_neutronPositions(numNeutrons, TwoVec{0.0, 0.0}),
+                                                            m_neutronDirections(numNeutrons, TwoVec{1.0, 0.0}) {
+        // neutrons facing x axis by default
 
         m_majorantCrossSec = -1;
         for (size_t i{}; i < m_materials.size(); i++)
-            m_majorantCrossSec = std::max( m_majorantCrossSec, m_materials[i].getCrossSec() );
+            m_majorantCrossSec = std::max(m_majorantCrossSec, m_materials[i].getCrossSec());
 
-        m_minMeanFreePath = 1.0 / m_majorantCrossSec ;
+        m_minMeanFreePath = 1.0 / m_majorantCrossSec;
         std::uniform_real_distribution<double> jitter(-1e-6, 1e-6);
-        for (auto &pos : m_neutronPositions) {
+        for (auto &pos: m_neutronPositions) {
             pos.x += jitter(m_gen);
             pos.y += jitter(m_gen);
         }
     }
+
+    size_t getNumAbsorbed() const { return m_numAbsorbed; }
 
     // randomizes the neutron directions as in some experiments they might originate conically or isotropically
     void isotropicNeutronDirections() {
@@ -106,6 +111,8 @@ public:
     // does one step in the simulation
     void step() {
         for (size_t i{}; i < m_numNeutrons; i++) {
+            if (!m_alive[i]) continue;
+
             DEBUG_LOG("Neutron num: " + std::to_string(i));
 
             double currentMeanPath{};
@@ -125,16 +132,21 @@ public:
             if (neutronLeft) {
                 m_alive[i] = false;
                 continue;
+                // You can kill the neutron or just let it travel
+                //currentMeanPath = 999999;
+                //currentAbsProb = 0.000000;
             }
-
-            // Get the correct material variables
-            for (size_t j{}; j < m_volumes.size(); j++) {
-                if ( m_volumes[j]->contains(m_neutronPositions[i]) ) {
-                    currentMeanPath = m_materials[j].getMeanFreePath();
-                    currentAbsProb = m_materials[j].getAbsorptionProb();
-                    break;
+            else {
+                // Get the correct material variables
+                for (size_t j{}; j < m_volumes.size(); j++) {
+                    if ( m_volumes[j]->contains(m_neutronPositions[i]) ) {
+                        currentMeanPath = m_materials[j].getMeanFreePath();
+                        currentAbsProb = m_materials[j].getAbsorptionProb();
+                        break;
+                    }
                 }
             }
+
 
             DEBUG_LOG("\tCurrent Mean Path: " + std::to_string(currentMeanPath));
             DEBUG_LOG("\tCurrent AbsProb: " + std::to_string(currentAbsProb));
@@ -143,6 +155,7 @@ public:
             if (!m_isStepFict[i] &&  m_dist(m_gen) < currentAbsProb) {
                 DEBUG_LOG("\tNeutron Absorbed");
                 m_alive[i] = false;
+                m_numAbsorbed++;
                 continue;
             }
 
@@ -178,6 +191,7 @@ private:
     std::vector<Material> m_materials;
     std::vector<const Volume*> m_volumes;
     size_t m_numNeutrons;
+    size_t m_numAbsorbed;
 
     std::vector<char> m_alive;
     std::vector<char> m_isStepFict;

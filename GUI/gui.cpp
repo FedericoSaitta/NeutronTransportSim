@@ -68,15 +68,11 @@ void GUI::setUp(const std::vector<const Volume*>& scene, const std::vector<Mater
         counter++;
     }
 
-    std::vector<TwoVec> neutronPositions = {};
-    std::vector<bool> isStepFict = {};
-    std::vector<bool> alive = {};
+    Simulation sim(500, materials, scene);
+    sim.isotropicNeutronDirections();
 
-    for (int i{}; i < 500; i++) {
-        neutronPositions.push_back(TwoVec{0.0, 0.0});
-        isStepFict.push_back(false);
-        alive.push_back(true);
-    }
+    std::vector neutronPositions(500, TwoVec{0.0, 0.0});
+    std::vector<char> alive(500, 1);
 
     constexpr float neutronRadius = 3.0f; // pixels
     sf::CircleShape neutronShape(neutronRadius);
@@ -102,7 +98,6 @@ void GUI::setUp(const std::vector<const Volume*>& scene, const std::vector<Mater
         // Draw neutrons
         for (std::size_t i = 0; i < neutronPositions.size(); ++i) {
             if (alive[i]) {
-                neutronPositions[i].print();
                 auto& pos = neutronPositions[i];
                 const float cameraX = pos.x * 10 + 200;
                 const float cameraY = 200 - pos.y * 10;
@@ -114,8 +109,10 @@ void GUI::setUp(const std::vector<const Volume*>& scene, const std::vector<Mater
 
         window.display();
 
-        // Advance simulation
-        stepVolumeWoodCockSimulation(neutronPositions, isStepFict, alive, materials, scene);
+        // Advance simulation and get results
+        sim.step();
+        neutronPositions = sim.getNeutronPositions();
+        alive = sim.getAliveNeutrons();
 
         // --- Frame limiting ---
         sf::Time elapsed = clock.getElapsedTime();
@@ -123,7 +120,6 @@ void GUI::setUp(const std::vector<const Volume*>& scene, const std::vector<Mater
         std::cout<< "FPS: " << 1.0 / elapsed.asSeconds() << '\n';
         if (elapsed < frameDuration)
             sf::sleep(frameDuration - elapsed);
-
     }
 
 }
